@@ -1,10 +1,11 @@
 // ==========================================
 // 1. GAME DATA & RESOURCES
 // ==========================================
+// Note: We replaced the placeholder links with real image links here too!
 const classStats = {
-    'Knight': { hp: 150, atk: 25, def: 20, specialName: "Holy Strike", specialMult: 1.8, cooldownTimer: 3, img: "https://placehold.co/150x150/16213e/00ffcc?text=Knight" },
-    'Mage': { hp: 80, atk: 40, def: 5, specialName: "Meteor Storm", specialMult: 2.2, cooldownTimer: 4, img: "https://placehold.co/150x150/16213e/00ffcc?text=Mage" },
-    'Archer': { hp: 100, atk: 35, def: 10, specialName: "Snipe", specialMult: 2.0, cooldownTimer: 3, img: "https://placehold.co/150x150/16213e/00ffcc?text=Archer" }
+    'Knight': { hp: 150, atk: 25, def: 20, specialName: "Holy Strike", specialMult: 1.8, cooldownTimer: 3, img: "https://images.unsplash.com/photo-1598974542562-38d5f30689b9?auto=format&fit=crop&w=150&q=80" },
+    'Mage': { hp: 80, atk: 40, def: 5, specialName: "Meteor Storm", specialMult: 2.2, cooldownTimer: 4, img: "https://images.unsplash.com/photo-1514315384763-ba401779410f?auto=format&fit=crop&w=150&q=80" },
+    'Archer': { hp: 100, atk: 35, def: 10, specialName: "Snipe", specialMult: 2.0, cooldownTimer: 3, img: "https://images.unsplash.com/photo-1552874869-5c39ec9288dc?auto=format&fit=crop&w=150&q=80" }
 };
 
 let player = { name: "", hp: 0, maxHp: 0, atk: 0, def: 0 };
@@ -44,7 +45,7 @@ function setupPlayer(className) {
     document.getElementById('status-message').innerText = `Active Hero: ${className}`;
     document.getElementById('player-name').innerText = className;
     
-    // Update player sprite image in the arena
+    // This part swaps the image in the Arena when you pick a class!
     document.getElementById('player-sprite').src = stats.img;
     
     document.getElementById('skill-bar').style.display = 'flex';
