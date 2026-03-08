@@ -12,12 +12,15 @@
         <div class="top-bar">
             <h2>Wartune Web</h2>
             <div class="resources">
-                <span>Gold: <span id="gold-display">0</span></span>
+                <span class="res-gold">Gold: <span id="gold-display">0</span></span>
+                <span class="res-balens">Balens: <span id="balen-display">0</span></span>
+                <button onclick="rechargeBalens()" class="recharge-btn">Recharge +</button>
             </div>
         </div>
 
         <div class="game-layout">
             <div class="left-column">
+                
                 <div class="panel">
                     <h2>1. Choose Your Hero</h2>
                     <div class="class-list">
@@ -38,31 +41,51 @@
                         </div>
                     </div>
                     <div id="status-message">No hero selected.</div>
+                    
+                    <div id="mount-display" style="display:none; margin-top: 15px; border-top: 1px solid #4e4e91; padding-top: 15px;">
+                        <h3 style="color: #ff00ff;">Active Mount: Royal Griffin</h3>
+                        <p>+500 HP | +50 ATK</p>
+                    </div>
                 </div>
 
                 <div class="panel">
-                    <h2>2. Sky City</h2>
+                    <h2>2. Sky City & Farm</h2>
                     <div class="building-card" id="town-hall">
                         <img src="https://images.unsplash.com/photo-1519074069444-1ba4fff66d16?auto=format&fit=crop&w=200&q=80" alt="Town Hall" class="building-img">
                         <h3>Town Hall (Level <span id="lvl">1</span>)</h3>
-                        <p>Status: <span id="status" class="status-idle">Idle</span></p>
                         <div id="timer-display" class="timer"></div>
                         <button id="upgrade-btn" onclick="startUpgrade()">Upgrade</button>
+                    </div>
+
+                    <div class="farm-container">
+                        <h3>Your Farm</h3>
+                        <div class="farm-grid">
+                            <div class="farm-plot" id="plot-1" onclick="interactFarm(1)">
+                                <span id="plot-text-1">Empty Plot<br>(Click to Plant)</span>
+                            </div>
+                            <div class="farm-plot" id="plot-2" onclick="interactFarm(2)">
+                                <span id="plot-text-2">Empty Plot<br>(Click to Plant)</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div class="right-column">
+                
+                <div class="panel" style="margin-bottom: 20px; border-color: #ff00ff;">
+                    <h2 style="color: #ff00ff; border-color: #ff00ff;">Premium Shop</h2>
+                    <p>Spend Balens for massive power boosts!</p>
+                    <button id="buy-mount-btn" onclick="buyMount()" style="background: #ff00ff; color: white;">Buy Griffin Mount (Cost: 100 Balens)</button>
+                </div>
+
                 <div class="panel combat-panel">
                     <h2>3. Combat Arena</h2>
-                    
                     <div class="arena" id="arena-container">
                         <div id="qte-overlay" class="qte-overlay" style="display: none;">
-                            <h3 style="color: #ffcc00; text-shadow: 0 0 10px #ffcc00;">QTE COMBO!</h3>
+                            <h3 style="color: #ffcc00;">QTE COMBO!</h3>
                             <div id="qte-keys" class="qte-keys"></div>
-                            <div class="qte-timer-bar-bg">
-                                <div id="qte-timer-bar" class="qte-timer-bar"></div>
-                            </div>
+                            <div class="qte-timer-bar-bg"><div id="qte-timer-bar" class="qte-timer-bar"></div></div>
                         </div>
 
                         <div class="entity">
