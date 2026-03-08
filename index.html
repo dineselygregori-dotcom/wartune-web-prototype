@@ -22,14 +22,17 @@
                     <h2>1. Choose Your Hero</h2>
                     <div class="class-list">
                         <div class="class-card" onclick="selectClass('Knight')">
+                            <img src="https://placehold.co/100x100/16213e/00d2ff?text=Knight" alt="Knight" class="portrait">
                             <h3>Knight</h3>
                             <p>HP: 150 | ATK: 25</p>
                         </div>
                         <div class="class-card" onclick="selectClass('Mage')">
+                            <img src="https://placehold.co/100x100/16213e/00d2ff?text=Mage" alt="Mage" class="portrait">
                             <h3>Mage</h3>
                             <p>HP: 80 | ATK: 40</p>
                         </div>
                         <div class="class-card" onclick="selectClass('Archer')">
+                            <img src="https://placehold.co/100x100/16213e/00d2ff?text=Archer" alt="Archer" class="portrait">
                             <h3>Archer</h3>
                             <p>HP: 100 | ATK: 35</p>
                         </div>
@@ -40,6 +43,7 @@
                 <div class="panel">
                     <h2>2. Sky City</h2>
                     <div class="building-card" id="town-hall">
+                        <img src="https://placehold.co/200x100/16213e/ffcc00?text=Town+Hall" alt="Town Hall" class="building-img">
                         <h3>Town Hall (Level <span id="lvl">1</span>)</h3>
                         <p>Status: <span id="status" class="status-idle">Idle</span></p>
                         <div id="timer-display" class="timer"></div>
@@ -57,6 +61,8 @@
                             <h3 id="player-name">Player</h3>
                             <p style="color: #00d2ff; font-weight: bold; margin-bottom: 5px;">Lv. <span id="player-lvl-text">1</span></p>
                             
+                            <img id="player-sprite" src="https://placehold.co/150x150/16213e/00ffcc?text=Hero" alt="Player" class="arena-sprite player-glow">
+                            
                             <div class="health-bar-bg">
                                 <div id="player-hp-bar" class="health-bar player-hp"></div>
                             </div>
@@ -72,6 +78,9 @@
 
                         <div class="entity">
                             <h3 id="enemy-name">Void Minotaur</h3>
+                            
+                            <img id="enemy-sprite" src="https://placehold.co/150x150/16213e/ff0055?text=Minotaur" alt="Enemy" class="arena-sprite enemy-glow">
+
                             <div class="health-bar-bg">
                                 <div id="enemy-hp-bar" class="health-bar enemy-hp"></div>
                             </div>
@@ -79,12 +88,18 @@
                         </div>
                     </div>
 
-                    <button id="attack-btn" onclick="attackEnemy()" disabled>Attack!</button>
+                    <div id="skill-bar" class="skill-bar" style="display: none;">
+                        <button id="basic-atk-btn" class="skill-btn" onclick="useSkill('basic')">Attack</button>
+                        <button id="special-atk-btn" class="skill-btn special-skill" onclick="useSkill('special')">
+                            <span id="special-name">Special</span>
+                            <div id="cooldown-overlay" class="cooldown-overlay"></div>
+                        </button>
+                    </div>
                     
                     <div id="battle-log" class="battle-log">
                         Select a hero to enter the arena.
                     </div>
-                    <button id="reset-battle-btn" onclick="resetBattle()" style="display:none; margin-top: 10px; background: #ffcc00; color: #000;">Claim Loot & Fight Next Monster</button>
+                    <button id="reset-battle-btn" onclick="resetBattle()" style="display:none; margin-top: 10px; background: #ffcc00; color: #000;">Claim Loot & Fight Next</button>
                 </div>
             </div>
         </div>

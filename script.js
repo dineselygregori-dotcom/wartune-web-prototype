@@ -2,43 +2,35 @@
 // 1. GAME DATA & RESOURCES
 // ==========================================
 const classStats = {
-    'Knight': { hp: 150, atk: 25, def: 20 },
-    'Mage': { hp: 80, atk: 40, def: 5 },
-    'Archer': { hp: 100, atk: 35, def: 10 }
+    'Knight': { hp: 150, atk: 25, def: 20, specialName: "Holy Strike", specialMult: 1.8, cooldownTimer: 3, img: "https://placehold.co/150x150/16213e/00ffcc?text=Knight" },
+    'Mage': { hp: 80, atk: 40, def: 5, specialName: "Meteor Storm", specialMult: 2.2, cooldownTimer: 4, img: "https://placehold.co/150x150/16213e/00ffcc?text=Mage" },
+    'Archer': { hp: 100, atk: 35, def: 10, specialName: "Snipe", specialMult: 2.0, cooldownTimer: 3, img: "https://placehold.co/150x150/16213e/00ffcc?text=Archer" }
 };
 
 let player = { name: "", hp: 0, maxHp: 0, atk: 0, def: 0 };
 let enemy = { name: "Void Minotaur", hp: 100, maxHp: 100, atk: 15, def: 5 };
 
-// Economy & Progression State
 let playerGold = parseInt(localStorage.getItem('playerGold')) || 0;
 let playerLevel = parseInt(localStorage.getItem('playerLevel')) || 1;
 let playerExp = parseInt(localStorage.getItem('playerExp')) || 0;
 
-function getExpRequirement(level) {
-    return level * 100; // Lv 1 needs 100, Lv 2 needs 200, etc.
-}
+let currentCooldown = 0; 
+
+function getExpRequirement(level) { return level * 100; }
 
 function updateResourceUI() {
     document.getElementById('gold-display').innerText = playerGold;
-    
-    // Update Town Hall UI
     let cityLevel = parseInt(localStorage.getItem('townHallLevel') || 1);
     let upgradeCost = cityLevel * 50; 
-    
     const upgradeBtn = document.getElementById('upgrade-btn');
     if (!localStorage.getItem('upgradeFinishTime')) {
         upgradeBtn.innerText = `Upgrade (Cost: ${upgradeCost}g)`;
-        if (playerGold < upgradeCost) {
-            upgradeBtn.style.background = "#885555";
-        } else {
-            upgradeBtn.style.background = "#00d2ff";
-        }
+        upgradeBtn.style.background = (playerGold < upgradeCost) ? "#885555" : "#00d2ff";
     }
 }
 
 // ==========================================
-// 2. HERO PROGRESSION & COMBAT
+// 2. HERO PROGRESSION & UI
 // ==========================================
 function selectClass(className) {
     localStorage.setItem('selectedHero', className);
@@ -47,9 +39,18 @@ function selectClass(className) {
 
 function setupPlayer(className) {
     player.name = className;
+    const stats = classStats[className];
+    
     document.getElementById('status-message').innerText = `Active Hero: ${className}`;
     document.getElementById('player-name').innerText = className;
-    document.getElementById('attack-btn').disabled = false;
+    
+    // Update player sprite image in the arena
+    document.getElementById('player-sprite').src = stats.img;
+    
+    document.getElementById('skill-bar').style.display = 'flex';
+    document.getElementById('special-name').innerText = stats.specialName;
+    currentCooldown = 0; 
+    updateSkillUI();
     
     calculatePlayerStats();
     logBattle(`You selected the ${className}. The arena is ready!`);
@@ -57,35 +58,27 @@ function setupPlayer(className) {
 
 function calculatePlayerStats() {
     if (!player.name) return;
-
     const baseStats = classStats[player.name];
     let cityLevel = parseInt(localStorage.getItem('townHallLevel') || 1);
-    
-    // Multipliers for stats
     let cityBonus = cityLevel - 1;
     let heroBonus = playerLevel - 1;
 
-    // Both Town Hall AND Hero Level increase stats now!
     player.maxHp = baseStats.hp + (cityBonus * 20) + (heroBonus * 30);
     player.atk = baseStats.atk + (cityBonus * 5) + (heroBonus * 8);
     player.def = baseStats.def + (cityBonus * 3) + (heroBonus * 5);
-    
     player.hp = player.maxHp; 
     updateHealthAndExpBars();
 }
 
 function updateHealthAndExpBars() {
-    // Player HP
     const playerHpPercent = Math.max((player.hp / player.maxHp) * 100, 0);
     document.getElementById('player-hp-bar').style.width = playerHpPercent + '%';
     document.getElementById('player-hp-text').innerText = `${Math.max(player.hp, 0)} / ${player.maxHp}`;
 
-    // Enemy HP
     const enemyHpPercent = Math.max((enemy.hp / enemy.maxHp) * 100, 0);
     document.getElementById('enemy-hp-bar').style.width = enemyHpPercent + '%';
     document.getElementById('enemy-hp-text').innerText = `${Math.max(enemy.hp, 0)} / ${enemy.maxHp}`;
 
-    // Player EXP & Level
     document.getElementById('player-lvl-text').innerText = playerLevel;
     let expNeeded = getExpRequirement(playerLevel);
     const expPercent = Math.min((playerExp / expNeeded) * 100, 100);
@@ -99,45 +92,81 @@ function logBattle(message) {
     logBox.scrollTop = logBox.scrollHeight; 
 }
 
-function attackEnemy() {
-    // Player Attacks
-    let playerDamage = Math.max(player.atk - enemy.def, 1);
+// ==========================================
+// 3. SKILLS & COMBAT LOGIC
+// ==========================================
+function updateSkillUI() {
+    const specialBtn = document.getElementById('special-atk-btn');
+    const overlay = document.getElementById('cooldown-overlay');
+    
+    if (currentCooldown > 0) {
+        specialBtn.disabled = true;
+        overlay.style.opacity = '1';
+        overlay.innerText = currentCooldown;
+    } else {
+        specialBtn.disabled = false;
+        overlay.style.opacity = '0';
+    }
+}
+
+function useSkill(type) {
+    let playerDamage = 0;
+    let attackName = "Attack";
+    let color = "#00ffcc";
+
+    if (type === 'basic') {
+        playerDamage = Math.max(player.atk - enemy.def, 1);
+    } else if (type === 'special') {
+        const stats = classStats[player.name];
+        playerDamage = Math.max(Math.floor((player.atk * stats.specialMult) - enemy.def), 1);
+        attackName = stats.specialName;
+        color = "#d500f9"; 
+        currentCooldown = stats.cooldownTimer + 1; 
+    }
+
     enemy.hp -= playerDamage;
-    logBattle(`<span style="color:#00ffcc">You hit ${enemy.name} for ${playerDamage} damage!</span>`);
+    logBattle(`<span style="color:${color}">You used ${attackName} on ${enemy.name} for ${playerDamage} damage!</span>`);
 
     if (enemy.hp <= 0) {
-        updateHealthAndExpBars();
-        logBattle(`<span style="color:#ffcc00; font-weight:bold;">Victory! ${enemy.name} is defeated.</span>`);
-        
-        // GIVE REWARDS (Gold and EXP)
-        let goldReward = 20 + Math.floor(Math.random() * 10);
-        let expReward = 35 + Math.floor(Math.random() * 20); // 35 to 54 EXP
-        
-        logBattle(`<span style="color:#ffcc00">Looted ${goldReward} Gold and gained ${expReward} EXP!</span>`);
-        
-        playerGold += goldReward;
-        localStorage.setItem('playerGold', playerGold);
-        updateResourceUI();
-        
-        gainExp(expReward);
-
-        document.getElementById('attack-btn').disabled = true;
-        document.getElementById('reset-battle-btn').style.display = 'block';
+        handleVictory();
         return; 
     }
 
-    // Enemy Attacks
     let enemyDamage = Math.max(enemy.atk - player.def, 1);
     player.hp -= enemyDamage;
     logBattle(`<span style="color:#ff0055">${enemy.name} hits you for ${enemyDamage} damage!</span>`);
 
     if (player.hp <= 0) {
         logBattle(`<span style="color:red; font-weight:bold;">Defeat! You have fallen in battle.</span>`);
-        document.getElementById('attack-btn').disabled = true;
+        document.getElementById('basic-atk-btn').disabled = true;
+        document.getElementById('special-atk-btn').disabled = true;
         document.getElementById('reset-battle-btn').style.display = 'block';
     }
 
+    if (currentCooldown > 0) {
+        currentCooldown--;
+    }
+    
     updateHealthAndExpBars();
+    updateSkillUI();
+}
+
+function handleVictory() {
+    updateHealthAndExpBars();
+    logBattle(`<span style="color:#ffcc00; font-weight:bold;">Victory! ${enemy.name} is defeated.</span>`);
+    
+    let goldReward = 20 + Math.floor(Math.random() * 10);
+    let expReward = 35 + Math.floor(Math.random() * 20); 
+    logBattle(`<span style="color:#ffcc00">Looted ${goldReward} Gold and gained ${expReward} EXP!</span>`);
+    
+    playerGold += goldReward;
+    localStorage.setItem('playerGold', playerGold);
+    updateResourceUI();
+    gainExp(expReward);
+
+    document.getElementById('basic-atk-btn').disabled = true;
+    document.getElementById('special-atk-btn').disabled = true;
+    document.getElementById('reset-battle-btn').style.display = 'block';
 }
 
 function gainExp(amount) {
@@ -145,40 +174,37 @@ function gainExp(amount) {
     let expNeeded = getExpRequirement(playerLevel);
 
     if (playerExp >= expNeeded) {
-        // Level Up!
         playerLevel++;
-        playerExp -= expNeeded; // Carry over excess EXP
-        
+        playerExp -= expNeeded; 
         localStorage.setItem('playerLevel', playerLevel);
-        
-        logBattle(`<span style="color:#aa00ff; font-weight:bold;">LEVEL UP! You are now Level ${playerLevel}. Stats increased!</span>`);
-        calculatePlayerStats(); // Recalculate max HP and heal to full
+        logBattle(`<span style="color:#aa00ff; font-weight:bold;">LEVEL UP! You are now Level ${playerLevel}.</span>`);
+        calculatePlayerStats(); 
     }
-    
     localStorage.setItem('playerExp', playerExp);
     updateHealthAndExpBars();
 }
 
 function resetBattle() {
     player.hp = player.maxHp;
+    currentCooldown = 0; 
     
-    // Scale enemy slightly based on player level so it doesn't get too easy
     let enemyMultiplier = playerLevel - 1;
     enemy.maxHp = 100 + (enemyMultiplier * 15);
     enemy.hp = enemy.maxHp;
     enemy.atk = 15 + (enemyMultiplier * 3);
     enemy.def = 5 + (enemyMultiplier * 2);
     
-    document.getElementById('attack-btn').disabled = false;
+    document.getElementById('basic-atk-btn').disabled = false;
     document.getElementById('reset-battle-btn').style.display = 'none';
     document.getElementById('battle-log').innerHTML = '';
     
     logBattle(`A new ${enemy.name} approaches!`);
     updateHealthAndExpBars();
+    updateSkillUI();
 }
 
 // ==========================================
-// 3. CITY BUILDING SYSTEM
+// 4. CITY BUILDING SYSTEM
 // ==========================================
 let countdownInterval;
 const UPGRADE_TIME_SECONDS = 10;
@@ -203,7 +229,7 @@ function startUpgrade() {
     let upgradeCost = cityLevel * 50;
 
     if (playerGold < upgradeCost) {
-        alert(`Not enough gold! You need ${upgradeCost}g to upgrade. Head to the Arena!`);
+        alert(`Not enough gold! You need ${upgradeCost}g to upgrade.`);
         return;
     }
 
@@ -258,14 +284,11 @@ function finishUpgrade(wasOffline) {
 }
 
 // ==========================================
-// 4. INITIALIZATION ON LOAD
+// 5. INITIALIZATION ON LOAD
 // ==========================================
 window.onload = () => {
     updateResourceUI();
     initCity();
-    
     const savedHero = localStorage.getItem('selectedHero');
-    if (savedHero) {
-        setupPlayer(savedHero);
-    }
+    if (savedHero) setupPlayer(savedHero);
 };
