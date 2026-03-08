@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wartune Ultra Prototype</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-wrapper">
+        
+        <div class="top-bar">
+            <h2>Wartune Web</h2>
+            <div class="resources">
+                <span>Gold: <span id="gold-display">0</span></span>
+            </div>
+        </div>
+
+        <div class="game-layout">
+            <div class="left-column">
+                <div class="panel">
+                    <h2>1. Choose Your Hero</h2>
+                    <div class="class-list">
+                        <div class="class-card" onclick="selectClass('Knight')">
+                            <h3>Knight</h3>
+                            <p>HP: 150 | ATK: 25</p>
+                        </div>
+                        <div class="class-card" onclick="selectClass('Mage')">
+                            <h3>Mage</h3>
+                            <p>HP: 80 | ATK: 40</p>
+                        </div>
+                        <div class="class-card" onclick="selectClass('Archer')">
+                            <h3>Archer</h3>
+                            <p>HP: 100 | ATK: 35</p>
+                        </div>
+                    </div>
+                    <div id="status-message">No hero selected.</div>
+                </div>
+
+                <div class="panel">
+                    <h2>2. Sky City</h2>
+                    <div class="building-card" id="town-hall">
+                        <h3>Town Hall (Level <span id="lvl">1</span>)</h3>
+                        <p>Status: <span id="status" class="status-idle">Idle</span></p>
+                        <div id="timer-display" class="timer"></div>
+                        <button id="upgrade-btn" onclick="startUpgrade()">Upgrade</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-column">
+                <div class="panel combat-panel">
+                    <h2>3. Combat Arena</h2>
+                    
+                    <div class="arena">
+                        <div class="entity">
+                            <h3 id="player-name">Player</h3>
+                            <p style="color: #00d2ff; font-weight: bold; margin-bottom: 5px;">Lv. <span id="player-lvl-text">1</span></p>
+                            
+                            <div class="health-bar-bg">
+                                <div id="player-hp-bar" class="health-bar player-hp"></div>
+                            </div>
+                            <p>HP: <span id="player-hp-text">0</span></p>
+                            
+                            <div class="health-bar-bg" style="height: 10px; margin-top: 10px; border-color: #555;">
+                                <div id="player-exp-bar" class="health-bar player-exp"></div>
+                            </div>
+                            <p style="font-size: 0.8rem; color: #aaaaaa;">EXP: <span id="player-exp-text">0 / 100</span></p>
+                        </div>
+
+                        <div class="vs">VS</div>
+
+                        <div class="entity">
+                            <h3 id="enemy-name">Void Minotaur</h3>
+                            <div class="health-bar-bg">
+                                <div id="enemy-hp-bar" class="health-bar enemy-hp"></div>
+                            </div>
+                            <p>HP: <span id="enemy-hp-text">100</span></p>
+                        </div>
+                    </div>
+
+                    <button id="attack-btn" onclick="attackEnemy()" disabled>Attack!</button>
+                    
+                    <div id="battle-log" class="battle-log">
+                        Select a hero to enter the arena.
+                    </div>
+                    <button id="reset-battle-btn" onclick="resetBattle()" style="display:none; margin-top: 10px; background: #ffcc00; color: #000;">Claim Loot & Fight Next Monster</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
