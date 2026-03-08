@@ -7,122 +7,90 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="game-wrapper">
-        
+    <div class="game-container">
         <div class="top-bar">
-            <h2>Wartune Web</h2>
+            <div class="player-brief">
+                <img id="hud-avatar" src="https://images.unsplash.com/photo-1598974542562-38d5f30689b9?auto=format&fit=crop&w=50&q=80" alt="Avatar">
+                <div>
+                    <span id="hud-name">Hero</span> <span id="hud-lvl" style="color:#00d2ff;">Lv.1</span><br>
+                    <span style="color:#ffcc00; font-size:0.8rem;">BR: <span id="hud-br">1500</span></span>
+                </div>
+            </div>
             <div class="resources">
-                <span class="res-gold">Gold: <span id="gold-display">0</span></span>
-                <span class="res-balens">Balens: <span id="balen-display">0</span></span>
-                <button onclick="rechargeBalens()" class="recharge-btn">Recharge +</button>
+                <span style="color: #ffcc00;">Gold: <span id="gold-display">0</span></span>
+                <span style="color: #ff00ff;">Balens: <span id="balen-display">0</span></span>
+                <button onclick="rechargeBalens()" class="btn-sm">Recharge</button>
             </div>
         </div>
 
-        <div class="game-layout">
-            <div class="left-column">
+        <div class="main-view">
+            <div class="arena-view" id="arena-view">
+                <div class="entity player-entity">
+                    <img id="player-sprite" src="https://images.unsplash.com/photo-1598974542562-38d5f30689b9?auto=format&fit=crop&w=200&q=80" class="sprite player-glow">
+                    <div class="hp-bar-bg"><div id="player-hp-bar" class="hp-bar-fill fill-green"></div></div>
+                </div>
                 
-                <div class="panel">
-                    <h2>1. Choose Your Hero</h2>
-                    <div class="class-list">
-                        <div class="class-card" onclick="selectClass('Knight')">
-                            <img src="https://images.unsplash.com/photo-1598974542562-38d5f30689b9?auto=format&fit=crop&w=150&q=80" alt="Knight" class="portrait">
-                            <h3>Knight</h3>
-                            <p>HP: 150 | ATK: 25</p>
-                        </div>
-                        <div class="class-card" onclick="selectClass('Mage')">
-                            <img src="https://images.unsplash.com/photo-1514315384763-ba401779410f?auto=format&fit=crop&w=150&q=80" alt="Mage" class="portrait">
-                            <h3>Mage</h3>
-                            <p>HP: 80 | ATK: 40</p>
-                        </div>
-                        <div class="class-card" onclick="selectClass('Archer')">
-                            <img src="https://images.unsplash.com/photo-1552874869-5c39ec9288dc?auto=format&fit=crop&w=150&q=80" alt="Archer" class="portrait">
-                            <h3>Archer</h3>
-                            <p>HP: 100 | ATK: 35</p>
-                        </div>
-                    </div>
-                    <div id="status-message">No hero selected.</div>
-                    
-                    <div id="mount-display" style="display:none; margin-top: 15px; border-top: 1px solid #4e4e91; padding-top: 15px;">
-                        <h3 style="color: #ff00ff;">Active Mount: Royal Griffin</h3>
-                        <p>+500 HP | +50 ATK</p>
-                    </div>
+                <div class="entity enemy-entity">
+                    <img id="enemy-sprite" src="https://images.unsplash.com/photo-1580226929947-f0b83e3518a4?auto=format&fit=crop&w=200&q=80" class="sprite enemy-glow">
+                    <div class="hp-bar-bg"><div id="enemy-hp-bar" class="hp-bar-fill fill-red"></div></div>
                 </div>
 
-                <div class="panel">
-                    <h2>2. Sky City & Farm</h2>
-                    <div class="building-card" id="town-hall">
-                        <img src="https://images.unsplash.com/photo-1519074069444-1ba4fff66d16?auto=format&fit=crop&w=200&q=80" alt="Town Hall" class="building-img">
-                        <h3>Town Hall (Level <span id="lvl">1</span>)</h3>
-                        <div id="timer-display" class="timer"></div>
-                        <button id="upgrade-btn" onclick="startUpgrade()">Upgrade</button>
+                <div class="combat-ui">
+                    <div id="battle-log" class="battle-log">Awaiting battle...</div>
+                    <div class="skill-bar">
+                        <button id="basic-atk-btn" onclick="useSkill('basic')">Attack</button>
+                        <button id="special-atk-btn" onclick="startQTE()">Special Skill</button>
+                        <button id="reset-battle-btn" style="display:none;" onclick="resetBattle()">Next Enemy</button>
                     </div>
-
-                    <div class="farm-container">
-                        <h3>Your Farm</h3>
-                        <div class="farm-grid">
-                            <div class="farm-plot" id="plot-1" onclick="interactFarm(1)">
-                                <span id="plot-text-1">Empty Plot<br>(Click to Plant)</span>
-                            </div>
-                            <div class="farm-plot" id="plot-2" onclick="interactFarm(2)">
-                                <span id="plot-text-2">Empty Plot<br>(Click to Plant)</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="right-column">
-                
-                <div class="panel" style="margin-bottom: 20px; border-color: #ff00ff;">
-                    <h2 style="color: #ff00ff; border-color: #ff00ff;">Premium Shop</h2>
-                    <p>Spend Balens for massive power boosts!</p>
-                    <button id="buy-mount-btn" onclick="buyMount()" style="background: #ff00ff; color: white;">Buy Griffin Mount (Cost: 100 Balens)</button>
-                </div>
-
-                <div class="panel combat-panel">
-                    <h2>3. Combat Arena</h2>
-                    <div class="arena" id="arena-container">
-                        <div id="qte-overlay" class="qte-overlay" style="display: none;">
-                            <h3 style="color: #ffcc00;">QTE COMBO!</h3>
-                            <div id="qte-keys" class="qte-keys"></div>
-                            <div class="qte-timer-bar-bg"><div id="qte-timer-bar" class="qte-timer-bar"></div></div>
-                        </div>
-
-                        <div class="entity">
-                            <h3 id="player-name">Player</h3>
-                            <p style="color: #00d2ff; font-weight: bold; margin-bottom: 5px;">Lv. <span id="player-lvl-text">1</span></p>
-                            <img id="player-sprite" src="https://images.unsplash.com/photo-1598974542562-38d5f30689b9?auto=format&fit=crop&w=150&q=80" alt="Player" class="arena-sprite player-glow">
-                            <div class="health-bar-bg"><div id="player-hp-bar" class="health-bar player-hp"></div></div>
-                            <p>HP: <span id="player-hp-text">0</span></p>
-                            <div class="health-bar-bg" style="height: 10px; margin-top: 10px; border-color: #555;"><div id="player-exp-bar" class="health-bar player-exp"></div></div>
-                            <p style="font-size: 0.8rem; color: #aaaaaa;">EXP: <span id="player-exp-text">0 / 100</span></p>
-                        </div>
-
-                        <div class="vs">VS</div>
-
-                        <div class="entity">
-                            <h3 id="enemy-name">Void Minotaur</h3>
-                            <img id="enemy-sprite" src="https://images.unsplash.com/photo-1580226929947-f0b83e3518a4?auto=format&fit=crop&w=150&q=80" alt="Enemy" class="arena-sprite enemy-glow">
-                            <div class="health-bar-bg"><div id="enemy-hp-bar" class="health-bar enemy-hp"></div></div>
-                            <p>HP: <span id="enemy-hp-text">100</span></p>
-                        </div>
-                    </div>
-
-                    <div id="skill-bar" class="skill-bar" style="display: none;">
-                        <button id="basic-atk-btn" class="skill-btn" onclick="useSkill('basic')">Attack</button>
-                        <button id="special-atk-btn" class="skill-btn special-skill" onclick="startQTE()">
-                            <span id="special-name">Special</span>
-                            <div id="cooldown-overlay" class="cooldown-overlay"></div>
-                        </button>
-                    </div>
-                    
-                    <div id="battle-log" class="battle-log">Select a hero to enter the arena.</div>
-                    <button id="reset-battle-btn" onclick="resetBattle()" style="display:none; margin-top: 10px; background: #ffcc00; color: #000;">Claim Loot & Fight Next</button>
                 </div>
             </div>
         </div>
+
+        <div class="bottom-menu">
+            <button onclick="toggleModal('modal-char')">Character</button>
+            <button onclick="toggleModal('modal-bag')">Backpack</button>
+            <button onclick="toggleModal('modal-shop')">Shop</button>
+        </div>
+
+        <div id="modal-char" class="modal">
+            <div class="modal-header">Character & Equipment <button onclick="toggleModal('modal-char')">X</button></div>
+            <div class="modal-body char-grid">
+                <div class="equip-col">
+                    <div class="equip-slot" id="eq-weapon" onclick="unequipItem('weapon')">Weapon</div>
+                    <div class="equip-slot" id="eq-armor" onclick="unequipItem('armor')">Armor</div>
+                    <div class="equip-slot" id="eq-hat" onclick="unequipItem('hat')">Hat</div>
+                </div>
+                <div class="char-center">
+                    <img id="char-model" src="https://images.unsplash.com/photo-1598974542562-38d5f30689b9?auto=format&fit=crop&w=200&q=80">
+                    <div class="stats-box">
+                        <p>HP: <span id="stat-hp">0</span></p>
+                        <p>ATK: <span id="stat-atk">0</span></p>
+                        <p>DEF: <span id="stat-def">0</span></p>
+                    </div>
+                </div>
+                <div class="equip-col">
+                    <div class="equip-slot" id="eq-wings" onclick="unequipItem('wings')">Wings</div>
+                    <div class="equip-slot" id="eq-ring" onclick="unequipItem('ring')">Ring</div>
+                    <div class="equip-slot" id="eq-amulet" onclick="unequipItem('amulet')">Amulet</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="modal-bag" class="modal">
+            <div class="modal-header">Backpack <button onclick="toggleModal('modal-bag')">X</button></div>
+            <div class="modal-body">
+                <div class="bag-grid" id="bag-grid">
+                    </div>
+            </div>
+        </div>
+
+        <div id="modal-shop" class="modal">
+            <div class="modal-header">Marketplace & Mounts <button onclick="toggleModal('modal-shop')">X</button></div>
+            <div class="modal-body shop-grid" id="shop-grid">
+                </div>
+        </div>
+
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>
