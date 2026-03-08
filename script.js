@@ -1,7 +1,6 @@
 // ==========================================
 // 1. GAME DATA & RESOURCES
 // ==========================================
-// Note: We replaced the placeholder links with real image links here too!
 const classStats = {
     'Knight': { hp: 150, atk: 25, def: 20, specialName: "Holy Strike", specialMult: 1.8, cooldownTimer: 3, img: "https://images.unsplash.com/photo-1598974542562-38d5f30689b9?auto=format&fit=crop&w=150&q=80" },
     'Mage': { hp: 80, atk: 40, def: 5, specialName: "Meteor Storm", specialMult: 2.2, cooldownTimer: 4, img: "https://images.unsplash.com/photo-1514315384763-ba401779410f?auto=format&fit=crop&w=150&q=80" },
@@ -44,15 +43,12 @@ function setupPlayer(className) {
     
     document.getElementById('status-message').innerText = `Active Hero: ${className}`;
     document.getElementById('player-name').innerText = className;
-    
-    // This part swaps the image in the Arena when you pick a class!
     document.getElementById('player-sprite').src = stats.img;
-    
     document.getElementById('skill-bar').style.display = 'flex';
     document.getElementById('special-name').innerText = stats.specialName;
+    
     currentCooldown = 0; 
     updateSkillUI();
-    
     calculatePlayerStats();
     logBattle(`You selected the ${className}. The arena is ready!`);
 }
@@ -94,7 +90,94 @@ function logBattle(message) {
 }
 
 // ==========================================
-// 3. SKILLS & COMBAT LOGIC
+// 3. WARTUNE QTE (QUICK TIME EVENT) SYSTEM
+// ==========================================
+let qteActive = false;
+let qteSequence = [];
+let qteCurrentIndex = 0;
+let qteTimerInterval;
+
+const POSSIBLE_KEYS = ['w', 'a', 's', 'd'];
+
+function startQTE() {
+    // Disable buttons so you can't double click
+    document.getElementById('basic-atk-btn').disabled = true;
+    document.getElementById('special-atk-btn').disabled = true;
+
+    // Generate a random 4-key sequence
+    qteSequence = [];
+    for(let i=0; i<4; i++) {
+        qteSequence.push(POSSIBLE_KEYS[Math.floor(Math.random() * POSSIBLE_KEYS.length)]);
+    }
+    
+    qteCurrentIndex = 0;
+    qteActive = true;
+    
+    // Render QTE Box
+    const qteOverlay = document.getElementById('qte-overlay');
+    const qteKeysDiv = document.getElementById('qte-keys');
+    qteOverlay.style.display = 'flex';
+    qteKeysDiv.innerHTML = '';
+    
+    qteSequence.forEach((key, index) => {
+        qteKeysDiv.innerHTML += `<div class="qte-key" id="qte-key-${index}">${key}</div>`;
+    });
+
+    // Start Timer (2.5 seconds to complete QTE)
+    let timeLeft = 2500; 
+    const timerBar = document.getElementById('qte-timer-bar');
+    
+    qteTimerInterval = setInterval(() => {
+        timeLeft -= 50;
+        timerBar.style.width = (timeLeft / 2500) * 100 + '%';
+        
+        if (timeLeft <= 0) {
+            endQTE(false); // Time ran out, QTE failed
+        }
+    }, 50);
+}
+
+// Listen for keyboard presses
+window.addEventListener('keydown', (e) => {
+    if (!qteActive) return;
+    
+    const key = e.key.toLowerCase();
+    
+    // Check if they pressed a valid key (W,A,S,D)
+    if (POSSIBLE_KEYS.includes(key)) {
+        const expectedKey = qteSequence[qteCurrentIndex];
+        const keyDiv = document.getElementById(`qte-key-${qteCurrentIndex}`);
+        
+        if (key === expectedKey) {
+            // Correct key!
+            keyDiv.classList.add('success');
+            qteCurrentIndex++;
+            
+            // Did they finish the sequence?
+            if (qteCurrentIndex >= qteSequence.length) {
+                endQTE(true);
+            }
+        } else {
+            // Wrong key! QTE Failed
+            keyDiv.classList.add('fail');
+            endQTE(false);
+        }
+    }
+});
+
+function endQTE(wasSuccessful) {
+    clearInterval(qteTimerInterval);
+    qteActive = false;
+    
+    setTimeout(() => {
+        document.getElementById('qte-overlay').style.display = 'none';
+        // Execute the special attack with QTE result
+        executeSpecialAttack(wasSuccessful);
+    }, 300); // Tiny delay so player sees the red/green flash
+}
+
+// ==========================================
+// 4. COMBAT LOGIC
 // ==========================================
 function updateSkillUI() {
     const specialBtn = document.getElementById('special-atk-btn');
@@ -111,23 +194,39 @@ function updateSkillUI() {
 }
 
 function useSkill(type) {
-    let playerDamage = 0;
-    let attackName = "Attack";
-    let color = "#00ffcc";
-
     if (type === 'basic') {
-        playerDamage = Math.max(player.atk - enemy.def, 1);
-    } else if (type === 'special') {
-        const stats = classStats[player.name];
-        playerDamage = Math.max(Math.floor((player.atk * stats.specialMult) - enemy.def), 1);
-        attackName = stats.specialName;
-        color = "#d500f9"; 
-        currentCooldown = stats.cooldownTimer + 1; 
+        let playerDamage = Math.max(player.atk - enemy.def, 1);
+        enemy.hp -= playerDamage;
+        logBattle(`<span style="color:#00ffcc">You attacked ${enemy.name} for ${playerDamage} damage!</span>`);
+        triggerEnemyTurn();
+    }
+    // "special" is now handled via startQTE() and executeSpecialAttack()
+}
+
+function executeSpecialAttack(qteSuccess) {
+    const stats = classStats[player.name];
+    
+    // Normal damage calc
+    let baseSpecialDamage = Math.max(Math.floor((player.atk * stats.specialMult) - enemy.def), 1);
+    let finalDamage = baseSpecialDamage;
+    let logMsg = "";
+
+    if (qteSuccess) {
+        // 25% Bonus damage for hitting the QTE perfectly!
+        finalDamage = Math.floor(baseSpecialDamage * 1.25);
+        logMsg = `<span style="color:#ffcc00; font-weight:bold;">QTE PERFECT!</span> <span style="color:#d500f9">You used ${stats.specialName} on ${enemy.name} for massive ${finalDamage} damage!</span>`;
+    } else {
+        logMsg = `<span style="color:#aaaaaa;">QTE Missed.</span> <span style="color:#d500f9">You used ${stats.specialName} on ${enemy.name} for ${finalDamage} damage.</span>`;
     }
 
-    enemy.hp -= playerDamage;
-    logBattle(`<span style="color:${color}">You used ${attackName} on ${enemy.name} for ${playerDamage} damage!</span>`);
+    enemy.hp -= finalDamage;
+    logBattle(logMsg);
+    
+    currentCooldown = stats.cooldownTimer + 1; // Start cooldown
+    triggerEnemyTurn();
+}
 
+function triggerEnemyTurn() {
     if (enemy.hp <= 0) {
         handleVictory();
         return; 
@@ -144,9 +243,7 @@ function useSkill(type) {
         document.getElementById('reset-battle-btn').style.display = 'block';
     }
 
-    if (currentCooldown > 0) {
-        currentCooldown--;
-    }
+    if (currentCooldown > 0) currentCooldown--;
     
     updateHealthAndExpBars();
     updateSkillUI();
@@ -205,7 +302,7 @@ function resetBattle() {
 }
 
 // ==========================================
-// 4. CITY BUILDING SYSTEM
+// 5. CITY BUILDING SYSTEM
 // ==========================================
 let countdownInterval;
 const UPGRADE_TIME_SECONDS = 10;
@@ -285,7 +382,7 @@ function finishUpgrade(wasOffline) {
 }
 
 // ==========================================
-// 5. INITIALIZATION ON LOAD
+// 6. INITIALIZATION ON LOAD
 // ==========================================
 window.onload = () => {
     updateResourceUI();

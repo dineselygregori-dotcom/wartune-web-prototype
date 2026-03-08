@@ -56,21 +56,22 @@
                 <div class="panel combat-panel">
                     <h2>3. Combat Arena</h2>
                     
-                    <div class="arena">
+                    <div class="arena" id="arena-container">
+                        <div id="qte-overlay" class="qte-overlay" style="display: none;">
+                            <h3 style="color: #ffcc00; text-shadow: 0 0 10px #ffcc00;">QTE COMBO!</h3>
+                            <div id="qte-keys" class="qte-keys"></div>
+                            <div class="qte-timer-bar-bg">
+                                <div id="qte-timer-bar" class="qte-timer-bar"></div>
+                            </div>
+                        </div>
+
                         <div class="entity">
                             <h3 id="player-name">Player</h3>
                             <p style="color: #00d2ff; font-weight: bold; margin-bottom: 5px;">Lv. <span id="player-lvl-text">1</span></p>
-                            
                             <img id="player-sprite" src="https://images.unsplash.com/photo-1598974542562-38d5f30689b9?auto=format&fit=crop&w=150&q=80" alt="Player" class="arena-sprite player-glow">
-                            
-                            <div class="health-bar-bg">
-                                <div id="player-hp-bar" class="health-bar player-hp"></div>
-                            </div>
+                            <div class="health-bar-bg"><div id="player-hp-bar" class="health-bar player-hp"></div></div>
                             <p>HP: <span id="player-hp-text">0</span></p>
-                            
-                            <div class="health-bar-bg" style="height: 10px; margin-top: 10px; border-color: #555;">
-                                <div id="player-exp-bar" class="health-bar player-exp"></div>
-                            </div>
+                            <div class="health-bar-bg" style="height: 10px; margin-top: 10px; border-color: #555;"><div id="player-exp-bar" class="health-bar player-exp"></div></div>
                             <p style="font-size: 0.8rem; color: #aaaaaa;">EXP: <span id="player-exp-text">0 / 100</span></p>
                         </div>
 
@@ -78,27 +79,21 @@
 
                         <div class="entity">
                             <h3 id="enemy-name">Void Minotaur</h3>
-                            
                             <img id="enemy-sprite" src="https://images.unsplash.com/photo-1580226929947-f0b83e3518a4?auto=format&fit=crop&w=150&q=80" alt="Enemy" class="arena-sprite enemy-glow">
-
-                            <div class="health-bar-bg">
-                                <div id="enemy-hp-bar" class="health-bar enemy-hp"></div>
-                            </div>
+                            <div class="health-bar-bg"><div id="enemy-hp-bar" class="health-bar enemy-hp"></div></div>
                             <p>HP: <span id="enemy-hp-text">100</span></p>
                         </div>
                     </div>
 
                     <div id="skill-bar" class="skill-bar" style="display: none;">
                         <button id="basic-atk-btn" class="skill-btn" onclick="useSkill('basic')">Attack</button>
-                        <button id="special-atk-btn" class="skill-btn special-skill" onclick="useSkill('special')">
+                        <button id="special-atk-btn" class="skill-btn special-skill" onclick="startQTE()">
                             <span id="special-name">Special</span>
                             <div id="cooldown-overlay" class="cooldown-overlay"></div>
                         </button>
                     </div>
                     
-                    <div id="battle-log" class="battle-log">
-                        Select a hero to enter the arena.
-                    </div>
+                    <div id="battle-log" class="battle-log">Select a hero to enter the arena.</div>
                     <button id="reset-battle-btn" onclick="resetBattle()" style="display:none; margin-top: 10px; background: #ffcc00; color: #000;">Claim Loot & Fight Next</button>
                 </div>
             </div>
